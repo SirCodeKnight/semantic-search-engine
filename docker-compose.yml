@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo:5.0
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    environment:
+      - MONGO_INITDB_DATABASE=semantic_search
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - ./backend/data:/app/data
+    environment:
+      - MONGODB_URI=mongodb://mongo:27017/semantic_search
+      - API_KEY=${API_KEY:-default_api_key_for_development}
+      - MODEL_NAME=${MODEL_NAME:-all-MiniLM-L6-v2}
+      - EMBEDDING_DIMENSION=${EMBEDDING_DIMENSION:-384}
+      - INDEX_TYPE=${INDEX_TYPE:-Flat}
+      - PORT=8000
+      - HOST=0.0.0.0
+      - DEBUG=true
+      - ALLOWED_ORIGINS=http://localhost:3000
+    depends_on:
+      - mongo
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+      - REACT_APP_API_KEY=${API_KEY:-default_api_key_for_development}
+      - REACT_APP_THEME=${THEME:-light}
+    depends_on:
+      - backend
+
+volumes:
+  mongo-data:
