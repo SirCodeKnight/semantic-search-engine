@@ -138,9 +138,7 @@ Multiple themes are available by changing the `THEME` value in the frontend envi
 - `blue`
 - `green`
 
-## License
 
-MIT
 
 ## Acknowledgements
 
